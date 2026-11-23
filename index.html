@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<!-- බාස් App - PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#667eea">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="බාස් App">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛠️ බාස් App</title>
+<link id="googleFonts" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.mode-row{display:flex;gap:10px;margin-bottom:14px}
+.mode-row button{flex:1;padding:13px;border:none;border-radius:16px;font-weight:800;cursor:pointer;background:var(--input);color:var(--text);box-shadow:6px 6px 12px var(--clay-dark),-6px -6px 12px var(--clay-light)}
+.mode-row button.active{background:#111;color:#fff}
+.edit-btn{background:#f9a825;border:none;padding:6px 11px;border-radius:10px;cursor:pointer;font-weight:700;margin-right:5px}
+/* User Manual එකට විතරක් */
+.manual-box{background:var(--card2);border-radius:20px;padding:16px;margin-top:14px}
+.manual-box h3{margin:10px 0 6px;font-size:16px}
+.manual-box p, .manual-box li{font-size:14px;line-height:1.8;color:var(--text)}
+.manual-box ul{padding-left:18px}
+.manual-step{background:var(--input);border-radius:14px;padding:12px;margin:8px 0}
+.manual-num{display:inline-block;background:#111;color:#fff;padding:3px 10px;border-radius:20px;font-weight:800;font-size:13px;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <div class="logo-mini"><img id="settingsLogoImg" style="display:none;"></div>
+    <div>
+      <div class="app-title" id="topCompany">🛠️ බාස් App</div>
+      <div class="app-sub">බාස් App - Estimate & Rating</div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌙 අඳුරු</button>
+      <button class="icon-btn active" id="btnEstimate" onclick="showPage('estimate')">📋 ඇස්තමේන්තුව</button>
+      <button class="icon-btn" id="btnSettings" onclick="showPage('settings')">⚙️ සැකසුම්</button>
+      <button class="icon-btn" id="btnManual" onclick="showPage('manual')">📖 User Manual</button>
+      <button class="icon-btn" id="btnAbout" onclick="showPage('about')">👤 අප ගැන</button>
+    </div>
+  </div>
+
+  <!-- ===== ඇස්තමේන්තුව ===== -->
+  <div id="pageEstimate">
+    <div class="neu-card">
+      <div class="company-preview" id="previewCompany">ආයතනයේ නම</div>
+      <div class="preview-format" id="previewFormatName">ආකෘතිය: 01 ක්ලැසික්</div>
+    </div>
+    <div class="glass-card" style="padding-bottom:8px">
+      <div class="mode-row">
+        <button id="modeEstBtn" onclick="setMode('ESTIMATE')">1. ESTIMATE</button>
+        <button id="modeRateBtn" class="active" onclick="setMode('RATING')">2. RATING</button>
+      </div>
+      <div id="modeNote" style="text-align:center;font-size:13px;color:var(--muted)">වැඩේ අවසන් කල පසු</div>
+    </div>
+    <div class="glass-card">
+      <div class="form" class="print-logo">
+        <div><label>👤 පාරිභෝගිකයාගේ නම</label><input id="clientName" placeholder="පාරිභෝගිකයාගේ නම ලියන්න"></div>
+        <div><label>📅 දිනය</label><input id="dateInput" type="date"></div>
+        <div class="full"><label>✍️ වැඩය - මෙතන ලියන්න / List එකෙන් තෝරන්න</label><input id="itemName" list="workList" placeholder="උදා: පහල තට්ටුවේ බිලොක් ගල් බැඳීම"></div>
+        <datalist id="workList"></datalist>
+        <div><label>📐 ඒකකය</label><input id="unitInput" placeholder="උදා: 1 ගලකට / දික් අඩියක්"></div>
+        <div><label>💰 එක් අඩියකට රු. / Rate</label><input id="rate" type="number" placeholder="උදා: 75"></div>
+        <div id="qtyWrap">
+  <label>📐 මැනපු ගාණ + ඒකකය තෝරන්න</label>
+  <div style="display:flex; gap:8px;">
+    <input id="sqft" type="number" placeholder="උදා: 375" style="flex:1;">
+   <select id="qtyUnit">
+  <option value="වර්ග අඩි">වර්ග අඩි</option>
+  <option value="දික් අඩි">දික් අඩි</option>
+  <option value="වර්ග මීටර්">වර්ග මීටර්</option>
+  <option value="මීටර්">මීටර්</option>
+  <option value="අඟල්">අඟල්</option>
+  <option value="ගල්">ගල්</option>
+  <option value="කියුබ්">කියුබ්</option>
+  <option value="වැලි කියුබ්">වැලි කියුබ්</option>
+  <option value="ගල් කියුබ්">ගල් කියුබ්</option>
+  <option value="කොන්ක්‍රීට් කියුබ්">කොන්ක්‍රීට් කියුබ්</option>
+  <option value="පොයින්ට්">පොයින්ට්</option>
+  <option value="බෑග්">බෑග් (සිමෙන්ති)</option>
+  <option value="ලොරි">ලොරි (වැලි / ගල්)</option>
+  <option value="කිලෝ">කිලෝ (යකඩ / කම්බි)</option>
+  <option value="ටොන්">ටොන්</option>
+  <option value="කණු">කණු</option>
+  <option value="උලුවහු">උලුවහු</option>
+  <option value="ජනෙල්">ජනෙල්</option>
+  <option value="දොර">දොර</option>
+  <option value="ටයිල් පෙට්ටි">ටයිල් පෙට්ටි</option>
+  <option value="කෑලි">කෑලි</option>
+  <option value="පයිප්ප">පයිප්ප</option>
+  <option value="රෝල්">රෝල් (වයර් / පේන්ට්)</option>
+  <option value="ලීටර්">ලීටර්</option>
+  <option value="ගැලන්">ගැලන්</option>
+  <option value="බල්බ්">බල්බ්</option>
+  <option value="සොකට්">සොකට්</option>
+  <option value="ස්විච්">ස්විච්</option>
+  <option value="දවස්">දවස්</option>
+  <option value="පැය">පැය</option>
+  <option value="වැඩකරුවන්">වැඩකරුවන්</option>
+</select>
+  </div>
+</div>
+        <div id="directWrap"><label>හෝ සෘජු මුදල රු.</label><input id="direct" type="number" placeholder="උදා: 20000"></div>
+        <div class="full"><button class="btn-primary neu-btn" onclick="addItem()">+ එකතු කරන්න</button></div>
+      </div>
+    </div>
+    <div class="glass-card">
+      <table>
+        <thead><tr><th>අංකය</th><th>වැඩය</th><th id="thDetail">විස්තරය</th><th id="thAmount">මුදල</th><th></th></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="total-box" id="totalText">මුළු මුදල රු. 0</div>
+      <div class="total-box" id="estTotalNote" style="display:none;font-size:15px;color:var(--muted)">වැඩේ ආරම්භයට පෙර</div>
+      <div class="actions">
+        <button class="btn-primary neu-btn" onclick="doPrint()">🖨️ පී.ඩී.එෆ් / මුද්‍රණය</button>
+        <button class="btn-danger neu-btn" onclick="clearAll()">මකන්න</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== සැකසුම් ===== -->
+  <div id="pageSettings" style="display:none;">
+    <h2 class="sec-title">⚙️ සැකසුම් - සියල්ල වෙනස් කරන්න</h2>
+    <div class="glass-card">
+      <h3>🌗 තේමාව - එළිය / අඳුරු</h3>
+      <div class="theme-row">
+        <button class="theme-card" onclick="setTheme('light')">☀️ එළිය<br><small>කලින් තිබුණු විදියට</small></button>
+        <button class="theme-card" onclick="setTheme('dark')">🌙 අඳුරු<br><small>කළු, ඇසට පහසු</small></button>
+        <button class="theme-card" onclick="setTheme('auto')">🔄 ස්වයංක්‍රීය<br><small>දුරකථනයේ විදියට</small></button>
+      </div>
+    </div>
+    <div class="glass-card">
+      <h3>🏢 ආයතනයේ නම + 🎨 අකුරු - 50 ක්</h3>
+      <div class="form">
+        <div class="full"><label>ආයතනයේ නම - පළමු පේළිය</label><input id="setCompany1" placeholder="ඔබේ ආයතනයේ නම"></div>
+        <div class="full"><label>ආයතනයේ නම - දෙවන පේළිය</label><input id="setCompany2" placeholder="උදා: ඉදිකිරීම්"></div>
+        <div class="full"><label>🔍 අකුරු සොයන්න</label><input id="fontSearch" placeholder="ලියන්න... උදා: Playfair, Bebas" oninput="filterFonts()"></div>
+        <div class="full"><label>අකුරු තෝරන්න - 50 ක්</label><select id="setFont"></select></div>
+        <div><label>අකුරු ප්‍රමාණය</label><input id="setFontSize" type="number" value="40"></div>
+        <div><label>අකුරු පාට</label><input id="setFontColor" type="color" value="#111111"></div>
+      </div>
+      <div class="font-preview" id="fontPreview">ආයතනයේ නම</div>
+    </div>
+    <div class="glass-card">
+      <h3>🖼️ ලාංඡනය - උඩුගත කරන්න</h3>
+      <div class="form"><div class="full"><label>ලාංඡන පින්තූරයක් තෝරන්න</label><input type="file" id="logoInput" accept="image/*" onchange="uploadLogo(event)"></div></div>
+      <div class="logo-preview-box"><img id="settingsLogoImg" style="display:none;"><span id="logoEmpty">ලාංඡනයක් නැහැ - උඩුගත කරන්න</span></div>
+      <button class="btn-danger neu-btn" onclick="removeLogo()" style="margin-top:10px;">ලාංඡනය ඉවත් කරන්න</button>
+    </div>
+    <div class="glass-card">
+      <h3>📞 දුරකථන + ලිපිනය</h3>
+      <div class="form">
+        <div><label>දුරකථන 1</label><input id="setContact1" placeholder="උදා: 071 123 4567"></div>
+        <div><label>දුරකථන 2</label><input id="setContact2" placeholder="උදා: 011 123 4567"></div>
+        <div class="full"><label>ලිපිනය - පළමු පේළිය</label><input id="setAddress1" placeholder="උදා: 123, ප්‍රධාන පාර,"></div>
+        <div class="full"><label>ලිපිනය - දෙවන පේළිය</label><input id="setAddress2" placeholder="උදා: කොළඹ"></div>
+        <div class="full"><label>💬 ස්තූති වාක්‍යය</label><input id="setThanks" placeholder="උදා: ස්තූතියි!"></div>
+      </div>
+    </div>
+    <div class="glass-card">
+      <h3>🎨 ආකෘති අච්චුව - 30 ක් <span id="formatCount"></span></h3>
+      <input id="formatSearch" placeholder="🔍 ආකෘතිය සොයන්න... උදා: රාජකීය, නවීන, රන්" oninput="filterFormats()" style="width:100%; padding:12px; border:none; border-radius:12px; background:#eef1f6; margin-bottom:12px;">
+      <div class="format-grid" id="formatGrid"></div>
+      <input type="hidden" id="setFormat" value="1">
+    </div>
+    <button class="btn-save neu-btn" onclick="saveSettings()">💾 සුරකින්න</button>
+    <button class="btn-danger neu-btn" onclick="resetSettings()" style="margin-top:10px;">නැවත සකසන්න - සියල්ල හිස් කරන්න</button>
+  </div>
+
+    <!-- ===== USER MANUAL ===== -->
+  <div id="pageManual" style="display:none;">
+    <h2 class="sec-title">📖 User Manual - App එක පාවිච්චි කරන විදිය</h2>
+
+    <div class="manual-box">
+      <h3>🔰 මුලින්ම දැනගන්න</h3>
+      <p>මේ App එකෙන් කරන්නේ වැඩ 2ක්:</p>
+      <ul>
+        <li><b>1. ESTIMATE</b> - Customer ට මුලින්ම දෙන Rate List එක.</li>
+        <li><b>2. RATING</b> - වැඩේ කරලා ඉවර වෙලා දෙන Bill එක.</li>
+      </ul>
+    </div>
+
+    <div class="manual-box">
+      <h3>⚙️ 1. මුලින්ම සැකසුම් හදාගන්න</h3>
+      <div class="manual-step"><span class="manual-num">Step 1</span><p><b>⚙️ සැකසුම්</b> Button එක ඔබන්න.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 2</span><p>ආයතනයේ නම දාන්න. උදා: පළමු පේළිය - <b>ප්‍රවීන්</b>, දෙවන පේළිය - <b>ඉදිකිරීම්</b></p></div>
+      <div class="manual-step"><span class="manual-num">Step 3</span><p>අකුරු වර්ග තෝරන්න. අකුරු වර්ග 50ක් තියෙනවා. සොයන්න තැනේ <b>Playfair</b> කියලා ටයිප් කරලා හොයන්න පුළුවන්.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 4</span><p>Logo එක තෝරන්න. Phone එකේ, Print එකේ Logo එක පෙන්නනවා.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 5</span><p>දුරකථන 1, 2 + ලිපිනය + ස්තූති වාක්‍යය දාන්න.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 6</span><p>ආකෘතිය තෝරන්න. <b>01 ක්ලැසික්</b> තමයි කලින් තිබ්බ PDF එකේ විදිය. <b>💾 සුරකින්න</b> අනිවාර්යයෙන්ම ඔබන්න.</p></div>
+      <p>⚠️ සුරකින්න නොගැහුවොත් Save වෙන්නේ නැහැ.</p>
+    </div>
+
+    <div class="manual-box">
+      <h3>📋 2. ESTIMATE හදන විදිය - Customer ට මුලින්ම දෙන එක</h3>
+      <div class="manual-step"><span class="manual-num">Step 1</span><p>උඩින් <b>1. ESTIMATE - Rate විතරයි</b> තෝරන්න.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 2</span><p>පාරිභෝගිකයාගේ නම + දිනය දාන්න.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 3</span><p>වැඩය ටයිප් කරන්න. උදා: <b>පහල තට්ටුවේ බවලොක් ගල් බැඳීම</b> - List එකෙන් තෝරන්නත් පුළුවන්, අලුත් වැඩක් ටයිප් කරන්නත් පුළුවන්.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 4</span><p>තෝරපු ගමන් <b>ඒකකය + Rate</b> එක තනියම වැටෙනවා. උදා: 1 ගලකට - රු.70. Rate එක වෙනස් කරන්න ඕන නම් ඒ තැනේ අලුත් ගාන ටයිප් කරන්න.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 5</span><p><b>+ එකතු කරන්න</b> ඔබන්න. ඔක්කොම වැඩ ටික එකතු කරාට පස්සේ <b>🖨️ පී.ඩී.එෆ් / මුද්‍රණය</b> ඔබන්න.</p></div>
+      <p><b>Print එක එන්නේ මෙහෙම:</b><br>1. පහල තට්ටුවේ බ්ලොක් ගල් බැඳීම 1 ගලකට රු.70<br>2. කපරාරුව පහල තට්ටුව අඩියක් රු.60<br><br>ESTIMATE එකේ <b>මුළු මුදලක් Print වෙන්නේ නැහැ.</b></p>
+    </div>
+
+    <div class="manual-box">
+      <h3>💰 3. RATING හදන විදිය - වැඩේ මැනලා ඉවර වෙලා දෙන Bill එක</h3>
+      <div class="manual-step"><span class="manual-num">Step 1</span><p>උඩින් <b>2. RATING - මුළු මුදල</b> තෝරන්න.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 2</span><p>පාරිභෝගිකයාගේ නම + දිනය දාන්න.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 3</span><p>වැඩය තෝරන්න / ටයිප් කරන්න. ඒකකය + Rate එක වැටෙනවා.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 4 - වැදගත්ම එක</span><p><b>මැනපු ගාණ + ඒකකය තෝරන්න.</b> මැනපු ගාණ ලියන තැන ළඟම Dropdown එකක් තියෙනවා. ඒකෙන් හරි ඒකකය තෝරන්න.<br><br>
+      ✅ <b>වර්ග අඩි</b> - කපරාරුව, ටයිල් වගේ ඒවට<br>
+      ✅ <b>දික් අඩි</b> - ලින්ටල්, ටයි බීම් වගේ ඒවට<br>
+      ✅ <b>ගල්</b> - බ්ලොක් ගල් බැඳීමට<br>
+      ✅ <b>කියුබ්</b> - කළුගල්, වැලි කියුබ්, ගල් කියුබ් වලට<br>
+      ✅ <b>පොයින්ට්</b> - වයරින් කිරීමට<br>
+      ✅ <b>බෑග්</b> - සිමෙන්ති බෑග් වලට<br>
+      ✅ <b>ලොරි</b> - වැලි / ගල් / පස් ලොරි වලට<br>
+      ✅ <b>කිලෝ</b> - යකඩ / කම්බි වලට<br>
+      ✅ <b>කණු / උලුවහු / ජනෙල් / දොර</b> - ඒ ඒ වැඩ වලට<br>
+      ✅ <b>ටයිල් පෙට්ටි, පයිප්ප, රෝල්, ලීටර්, දවස්</b> - තව ගොඩක් තියෙනවා</p></div>
+      <div class="manual-step"><span class="manual-num">Step 5</span><p><b>+ එකතු කරන්න</b> ඔබන්න. යටින් <b>මුළු මුදල රු.XXXX</b> කියලා පෙන්නනවා.</p></div>
+      <p><b>Print එක එන්නේ මෙහෙම:</b><br><br>
+      <b>වර්ග අඩි:</b><br>1. කපරාරුව පහල තට්ටුව . වර්ග අඩි ගණන 375. එක් අඩියකට රු.60. එකතුව රු.22500<br><br>
+      <b>ගල්:</b><br>1. බවලොක් ගල් බැඳීම . ගල් ගණන 100. එක් ගලකට රු.70. එකතුව රු.7000<br><br>
+      <b>කියුබ්:</b><br>1. කළුගල් බැඳීම . කියුබ් ගණන 2. එක් කියුබ් එකකට රු.12500. එකතුව රු.25000<br><br>
+      <b>පොයින්ට්:</b><br>1. වයරින් කිරීම . පොයින්ට් ගණන 10. එක් පොයින්ට් එකකට රු.1500. එකතුව රු.15000<br><br>
+      <b>බෑග්:</b><br>1. සිමෙන්ති . බෑග් ගණන 20. එක් බෑග් එකකට රු.2500. එකතුව රු.50000<br><br>
+      <b>මුළු මුදල රු.XXXX</b></p>
+    </div>
+
+    <div class="manual-box">
+      <h3>💵 4. සෘජු මුදලක් දාන විදිය - මැනපු ගාණක් නැති වැඩ වලට</h3>
+      <p>සමහර වැඩ වලට මැනපු ගාණක් නැහැ. උදා: <b>වහලේ අලුත්වැඩියාව, ප්‍රධාන උලුවහු තැබීම</b> වගේ වැඩ වලට කෙලින්ම මුදලක් දාන්න ඕන.</p>
+      <div class="manual-step"><span class="manual-num">Step 1</span><p>RATING එකේ ඉන්නකොට <b>හෝ සෘජු මුදල රු.</b> කියන තැනේ කෙලින්ම ගාන දාන්න. උදා: 20000</p></div>
+      <div class="manual-step"><span class="manual-num">Step 2</span><p>මැනපු ගාණ + Rate එක දාන්න එපා. සෘජු මුදල විතරක් දාන්න.</p></div>
+      <div class="manual-step"><span class="manual-num">Step 3</span><p><b>+ එකතු කරන්න</b> ඔබන්න.</p></div>
+      <p><b>Print එක එන්නේ මෙහෙම:</b><br>2. වහලේ අලුත්වැඩියාව රු.20000<br><br>⚠️ <b>සෘජු මුදලට <u>එකතුව</u> කියලා එන්නේ නැහැ.</b> මැනපු ගාණ දාන වැඩ වලට විතරයි <b>එකතුව</b> කියලා එන්නේ.</p>
+    </div>
+
+    <div class="manual-box">
+      <h3>✏️ 5. වැරදුනොත් හදන විදිය</h3>
+      <ul>
+        <li><b>Edit කරන්න:</b> Table එකේ <b>Edit</b> Button එක ඔබන්න. නම, ඒකකය, Rate එක, මැනපු ගාණ වෙනස් කරන්න පුළුවන්.</li>
+        <li><b>එකක් මකන්න:</b> Table එකේ <b>X</b> Button එක ඔබන්න.</li>
+        <li><b>සේරම මකන්න:</b> යටින් තියෙන <b>මකන්න</b> Button එක ඔබන්න.</li>
+        <li><b>ඒකකය වැරදුනොත්:</b> Edit කරලා ආයෙත් හරි ඒකකය (ගල් / කියුබ් / පොයින්ට්) තෝරලා එකතු කරන්න. පරණ එක X කරලා මකන්න.</li>
+      </ul>
+    </div>
+
+    <div class="manual-box">
+      <h3>🖨️ 6. Print / PDF කරන විදිය</h3>
+      <ul>
+        <li>1. <b>🖨️ පී.ඩී.එෆ් / මුද්‍රණය</b> ඔබන්න.</li>
+        <li>2. Print Page එකේ <b>Save as PDF</b> තෝරන්න.</li>
+        <li>3. <b>PDF</b> ඔබන්න. PDF එක Phone එකට Save වෙනවා.</li>
+        <li>4. ඒ PDF එක WhatsApp එකෙන් Customer ට යවන්න පුළුවන්.</li>
+      </ul>
+    </div>
+
+    <div class="manual-box">
+      <h3>❓ 7. නිතර අහන ප්‍රශ්න</h3>
+      <p><b>Q: වර්ග අඩි වෙනුවට ගල් / කියුබ් / පොයින්ට් දාන්නේ කොහොමද?</b><br>A: මැනපු ගාණ ලියන තැන ළඟ තියෙන Dropdown එකෙන් තෝරන්න. ගල් නම් ගල්, කියුබ් නම් කියුබ්.</p>
+      <p><b>Q: සෘජු මුදලට එකතුව කියලා එන්නේ නැත්තේ ඇයි?</b><br>A: ඒක හිතලාම හදලා තියෙන්නේ. සෘජු මුදලට එකතුව ඕන නැහැ. මැනපු ගාණ දාන එකට විතරයි එකතුව එන්නේ.</p>
+      <p><b>Q: Rate එක වෙනස් වුනාම මොකද කරන්නේ?</b><br>A: Rate තැනේ අලුත් ගාන ටයිප් කරලා එකතු කරන්න. නැත්තම් Edit එකෙන් වෙනස් කරන්න.</p>
+      <p><b>Q: Company නම Print එකේ පෙන්නන්නේ නැහැ?</b><br>A: සැකසුම් වලට ගිහින් නම දාලා 💾 සුරකින්න ඔබන්න.</p>
+      <p><b>Q: අඳුරු Theme එක දාන්නේ කොහොමද?</b><br>A: උඩින් තියෙන 🌙 අඳුරු Button එක ඔබන්න.</p>
+      <p><b>Q: අවුලක් ආවොත්?</b><br>A: 👤 අප ගැන Page එකේ WhatsApp Button එකෙන් Message එකක් යවන්න.</p>
+    </div>
+
+    <div class="glass-card" style="text-align:center;"><button class="btn-primary neu-btn" onclick="showPage('estimate')">📋 ඇස්තමේන්තුව හදන්න යන්න →</button></div>
+  </div>
+  <!-- ===== අප ගැන ===== -->
+  <div id="pageAbout" style="display:none;">
+    <div class="about-hero">
+      <div class="about-avatar"><img src="cl.jpeg" ></div>
+      <h2 id="aboutOwnerName">CODE Lanka</h2>
+      <p class="about-role" id="aboutRoleText"></p>
+      <p class="about-desc" id="aboutDescText">Code Lanka ගැන Code Lanka කියන්නේ ලංකාවේ පොඩි ව්‍යාපාර වලට තාක්ෂණයෙන් උදව් කරන්න පටන් ගත්ත ආයතනයක්.</p>
+    </div>
+    <div class="glass-card"><h3>🎯 වෙබ් අඩවිය හදපු හේතුව</h3><p class="about-purpose">කලින් ඇස්තමේන්තුවක් ලියන්න කොළයක ලියලා, කැල්කියුලේටරේ ගහලා ගොඩක් වෙලා යනවා. ඒ නිසා තමයි මේ ඇප් එක හැදුවේ.</p><div class="about-features"><span>⚡ වේගවත්</span><span>📱 දුරකථනයෙන්ම</span><span>💰 නිවැරදි ගණන්</span><span>🎨 ලස්සන ආකෘති 30</span></div></div>
+    <div class="glass-card"><h3>📞 සම්බන්ධ වෙන්න</h3><div class="contact-grid"><a href="https://wa.me/94767819671?text=ආයුබෝවන්!" target="_blank" class="contact-card wa-card"><div class="contact-icon wa-icon">💬</div><b>whatsapp</b><span>0767819671</span><small>මැසේජ් එකක් එවන්න →</small></a><a href="mailto:praveenrajapaksha9@email.com" class="contact-card email-card"><div class="contact-icon email-icon">✉️</div><b>E-mail</b><span>praveenrajapaksha9@email.com</span></a><a href="tel:+94711234567" class="contact-card hotline-card"><div class="contact-icon hotline-icon">📞</div><b>HotLine</b><span>071 123 4567</span></a></div></div>
+    <div class="glass-card" style="text-align:center;"><p style="font-size:13px; color:var(--muted);">© <span><b>2026</b></span> - <span><b>CODE Lanka</b></span><br> ❤️</p></div>
+  </div>
+</div>
+
+<div id="printArea">
+  <div class="print-logo"><img id="printLogoImg" style="display:none;"></div>
+  <div class="company" id="printCompany">ආයතනයේ නම</div>
+  <div class="box" id="printBox">
+    <div class="left"><div class="row"><span class="lbl">දුරකථන:-</span><span class="val" id="printContact1"></span></div><div class="row"><span class="lbl"></span><span class="val" id="printContact2"></span></div></div>
+    <div class="right"><div class="row"><span class="lbl">ලිපිනය:-</span><span class="val" id="printAddress1"></span></div><div class="row"><span class="lbl"></span><span class="val" id="printAddress2"></span></div></div>
+  </div>
+  <div class="date-line" id="printDate"></div><div class="items" id="printItems"></div><div class="total" id="printTotal"></div><div class="thanks" id="printThanks">ස්තූතියි!</div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
